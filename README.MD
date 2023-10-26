@@ -12,4 +12,4 @@ The Following needs to be done:
 Resources:
 
 1. Use this website to covert your ballot Initiative to JPG Files: https://www.adobe.com/acrobat/online/pdf-to-jpg.html
-2. Chat OCR Plugin: staf.ai/chatocr This is an alternative to ChatGPT's native OCR.
+2. Chat OCR Plugin: https://www.staf.ai/chatocr This is an alternative to ChatGPT's native OCR.
