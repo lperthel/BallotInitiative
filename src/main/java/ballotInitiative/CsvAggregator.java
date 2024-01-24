@@ -32,7 +32,6 @@ public class CsvAggregator {
         }
 
         writeCsv(outputPath, records);
-        System.out.println("done");
     }
 
     private static List<List<String>> readCsv(String filePath) throws IOException {
