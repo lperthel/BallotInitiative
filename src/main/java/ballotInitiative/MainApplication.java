@@ -1,12 +1,11 @@
 package ballotInitiative;
 
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
+import javax.imageio.ImageIO;
 
 public class MainApplication {
     private final static String initiativeScansInputLocation = "C:\\Users\\lpert\\git\\DC Civic Tech\\Ballot Initiative\\Ballot Inititive Scans\\test.pdf";
@@ -14,35 +13,51 @@ public class MainApplication {
 
     public static void main(String[] args) {
         try {
-            // Load the first page of the PDF
-            BufferedImage firstPageImage = loadFirstPageImage(initiativeScansInputLocation);
-
+            // Convert the pdf to png
+            PDFProcessor.convertPDFToPNG(initiativeScansInputLocation, initiativeScansOutputLocation);
             // Create and display the CropGUI
-            CropGUI cropGUI = new CropGUI(firstPageImage, cropArea -> {
+            File firstPageFile = new File(initiativeScansOutputLocation + "page_0.png");
+            if (!firstPageFile.exists()) {
+                System.err.println("First page PNG file not found.");
+                return;
+            }
+            BufferedImage firstPageImage = ImageIO.read(firstPageFile);
+
+            new CropGUI(firstPageImage, cropArea -> {
                 try {
                     // Process the PDF using the selected crop area
-                    PDFProcessor pdfProcessor = new PDFProcessor(cropArea);
-                    // pdfProcessor.cropAndSavePDF(initiativeScansInputLocation,
-                    // initiativeScansOutputLocation);
+                    Rectangle2D rect = new Rectangle2D.Double(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+                    PDFProcessor pdfProcessor = new PDFProcessor(rect);
                     pdfProcessor.cropAndSaveAsPNG(initiativeScansInputLocation, initiativeScansOutputLocation);
                     System.out.println("Done!");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
-
+            // TODO: Make this run after the callback is complete.
+            recombineCroppedImages();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
-    private static BufferedImage loadFirstPageImage(String path) throws IOException {
-        BufferedImage image = null;
-        try (PDDocument document = Loader.loadPDF(new File(path))) {
-            PDFRenderer renderer = new PDFRenderer(document);
-            // Assuming you want to render the first page (index 0)
-            image = renderer.renderImage(0, 1.0f); // 1.0f is the scaling factor (1x)
+    private static void recombineCroppedImages() {
+        try {
+            // Assume images are cropped and saved already, and their paths are stored in
+            // imagePaths array
+            String[] imagePaths = {
+                    "path/to/cropped_image_1.png",
+                    "path/to/cropped_image_2.png",
+                    // Add more paths as needed
+            };
+
+            String outputPath = "path/to/combined_output.pdf";
+            PDFProcessor.combineImagesIntoPDF(imagePaths, outputPath);
+
+            System.out.println("Combined PDF created successfully!");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return image;
     }
 }
